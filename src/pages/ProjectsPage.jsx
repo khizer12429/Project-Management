@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { selectAuth } from '@/features/auth/authSlice'
-import { projectSchema } from '@/features/admin/schemas'
+import { projectSchema } from '@/features/projects/projectSchema'
 import {
   addProject,
   clearProjectsError,

@@ -2,7 +2,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { userSchema } from '@/features/admin/schemas'
+import { userSchema } from '@/features/users/userSchema'
 import {
   addUser,
   clearUsersError,
