@@ -13,7 +13,7 @@ export async function fetchDashboardStats(isAdmin) {
       .from('tasks')
       .select('id', { count: 'exact', head: true })
       .neq('status', 'done')
-      .lt('due_date', today)
+      .lte('due_date', today)
       .not('due_date', 'is', null),
   ]
 

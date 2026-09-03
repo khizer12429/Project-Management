@@ -37,14 +37,42 @@ function mapTask(row) {
 export async function fetchTasks() {
   const { data, error } = await supabase
     .from('tasks')
-    .select(taskSelect)
+    .select(
+      'id, title, description, status, priority, due_date, created_at, updated_at, project_id, assigned_to, created_by',
+    )
     .order('created_at', { ascending: false })
 
   if (error) {
     throw new Error(error.message)
   }
 
-  return data.map(mapTask)
+  const mapped = []
+
+  for (const row of data) {
+    const { data: project } = await supabase
+      .from('projects')
+      .select('name')
+      .eq('id', row.project_id)
+      .maybeSingle()
+
+    const { data: assignee } = row.assigned_to
+      ? await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .eq('id', row.assigned_to)
+          .maybeSingle()
+      : { data: null }
+
+    mapped.push(
+      mapTask({
+        ...row,
+        projects: project,
+        assignee,
+      }),
+    )
+  }
+
+  return mapped
 }
 
 export async function fetchAssignableUsers() {
@@ -78,7 +106,7 @@ export async function createTask(payload) {
       description: payload.description,
       status: payload.status,
       priority: payload.priority,
-      due_date: payload.dueDate || null,
+      due_date: payload.dueDate,
       assigned_to: payload.assignedTo || null,
       created_by: user.id,
     })
@@ -116,7 +144,7 @@ export async function updateTask(payload) {
       description: payload.description,
       status: payload.status,
       priority: payload.priority,
-      due_date: payload.dueDate || null,
+      due_date: payload.dueDate,
       assigned_to: payload.assignedTo || null,
     })
     .eq('id', payload.id)

@@ -14,31 +14,21 @@ export function TaskComments({ taskId, currentUserId, canComment }) {
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    let cancelled = false
-
     async function loadComments() {
       setStatus('loading')
       setError(null)
 
       try {
         const data = await fetchTaskComments(taskId)
-        if (!cancelled) {
-          setComments(data)
-          setStatus('succeeded')
-        }
+        setComments(data)
+        setStatus('succeeded')
       } catch (loadError) {
-        if (!cancelled) {
-          setError(loadError.message)
-          setStatus('failed')
-        }
+        setError(loadError.message)
+        setStatus('failed')
       }
     }
 
     loadComments()
-
-    return () => {
-      cancelled = true
-    }
   }, [taskId])
 
   const handleSubmit = async (event) => {

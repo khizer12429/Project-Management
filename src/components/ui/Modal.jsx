@@ -54,8 +54,7 @@ export function Table({
   const [page, setPage] = useState(1)
   const totalItems = rows.length
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize))
-  const safePage = Math.min(page, totalPages)
-  const paginatedRows = rows.slice((safePage - 1) * pageSize, safePage * pageSize)
+  const paginatedRows = rows.slice((page - 1) * pageSize, page * pageSize)
 
   return (
     <div className="overflow-x-auto rounded-xl border border-border bg-surface">
@@ -96,7 +95,7 @@ export function Table({
         </tbody>
       </table>
       <Pagination
-        page={safePage}
+        page={page}
         totalPages={totalPages}
         totalItems={totalItems}
         pageSize={pageSize}

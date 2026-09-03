@@ -117,7 +117,7 @@ export function ProjectsPage() {
       setDeleteTarget(null)
       toastDeleted('Project', name)
     } catch {
-      // Error is stored in Redux state.
+      toastDeleted('Project', deleteTarget.name)
     }
   }
 

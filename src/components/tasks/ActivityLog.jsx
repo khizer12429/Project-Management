@@ -8,31 +8,21 @@ export function ActivityLog({ refreshKey = 0 }) {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    let cancelled = false
-
     async function loadActivity() {
       setStatus('loading')
       setError(null)
 
       try {
         const data = await fetchTaskActivity()
-        if (!cancelled) {
-          setItems(data)
-          setStatus('succeeded')
-        }
+        setItems(data)
+        setStatus('succeeded')
       } catch (loadError) {
-        if (!cancelled) {
-          setError(loadError.message)
-          setStatus('failed')
-        }
+        setError(loadError.message)
+        setStatus('failed')
       }
     }
 
     loadActivity()
-
-    return () => {
-      cancelled = true
-    }
   }, [refreshKey])
 
   return (

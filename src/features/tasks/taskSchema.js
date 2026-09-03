@@ -12,6 +12,6 @@ export const taskSchema = yup.object({
     .string()
     .oneOf(['low', 'medium', 'high'], 'Select a valid priority')
     .required(),
-  dueDate: yup.string().nullable().default(''),
+  dueDate: yup.string().nullable(),
   assignedTo: yup.string().nullable().default(''),
 })

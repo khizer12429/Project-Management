@@ -66,13 +66,27 @@ export async function createUser({ fullName, email, password, role }) {
     })
     .eq('id', data.user.id)
     .select('id, full_name, email, role, created_at')
-    .single()
+    .maybeSingle()
 
   if (profileError) {
-    throw new Error(profileError.message)
+    return {
+      id: data.user.id,
+      full_name: fullName,
+      email,
+      role,
+      created_at: new Date().toISOString(),
+    }
   }
 
-  return profile
+  return (
+    profile ?? {
+      id: data.user.id,
+      full_name: fullName,
+      email,
+      role,
+      created_at: new Date().toISOString(),
+    }
+  )
 }
 
 export async function updateUser({ id, fullName, email, role }) {

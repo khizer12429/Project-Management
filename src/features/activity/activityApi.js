@@ -30,11 +30,10 @@ export async function fetchTaskActivity() {
     )
     .eq('action', 'task_status_changed')
     .order('created_at', { ascending: false })
-    .limit(50)
 
   if (error) {
     throw new Error(error.message)
   }
 
-  return data.map(mapActivity)
+  return (data ?? []).map(mapActivity)
 }

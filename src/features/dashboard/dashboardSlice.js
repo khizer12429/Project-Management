@@ -9,8 +9,12 @@ const initialState = {
 
 export const loadDashboardStats = createAsyncThunk(
   'dashboard/loadStats',
-  async (isAdmin, { rejectWithValue }) => {
+  async (isAdmin, { getState, rejectWithValue }) => {
     try {
+      const { stats, status } = getState().dashboard
+      if (status === 'succeeded' && stats) {
+        return stats
+      }
       return await fetchDashboardStats(isAdmin)
     } catch (error) {
       return rejectWithValue(error.message)

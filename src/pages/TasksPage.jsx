@@ -39,7 +39,7 @@ function canCommentOnTask(task, userId, isAdmin) {
     return true
   }
 
-  return task.assignedTo === userId || task.createdBy === userId
+  return task.createdBy === userId
 }
 
 function isOverdue(task) {
@@ -136,17 +136,24 @@ export function TasksPage() {
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [updatingTaskId, setUpdatingTaskId] = useState(null)
-  const [activityRefreshKey, setActivityRefreshKey] = useState(0)
+  const [activityRefreshKey] = useState(0)
 
   useEffect(() => {
-    dispatch(loadTasks())
+    if (status === 'idle') {
+      dispatch(loadTasks())
+    }
     dispatch(loadProjects())
     dispatch(loadAssignees())
     dispatch(clearTasksError())
-  }, [dispatch])
+  }, [dispatch, status])
 
   const filteredItems = useMemo(() => {
+    const query = searchQuery.trim()
+
     return items.filter((task) => {
+      if (query) {
+        return matchesNameSearch(searchQuery, task.title)
+      }
       if (filters.projectId && task.projectId !== filters.projectId) {
         return false
       }
@@ -154,9 +161,6 @@ export function TasksPage() {
         return false
       }
       if (filters.priority && task.priority !== filters.priority) {
-        return false
-      }
-      if (!matchesNameSearch(searchQuery, task.title)) {
         return false
       }
       return true
@@ -188,24 +192,26 @@ export function TasksPage() {
       description: values.description,
       status: values.status,
       priority: values.priority,
-      dueDate: values.dueDate || null,
+      dueDate: values.dueDate,
       assignedTo: values.assignedTo || null,
     }
 
     try {
       if (editingTask) {
         await dispatch(editTask({ id: editingTask.id, ...payload })).unwrap()
-        if (isAdmin && editingTask.status !== payload.status) {
-          setActivityRefreshKey((current) => current + 1)
-        }
-        toastUpdated('Task', payload.title)
+        closeModal()
       } else {
         await dispatch(addTask(payload)).unwrap()
-        toastCreated('Task', payload.title)
+        closeModal()
       }
-      closeModal()
     } catch {
       // Error is stored in Redux state.
+    }
+
+    if (editingTask) {
+      toastUpdated('Task', payload.title)
+    } else {
+      toastCreated('Task', payload.title)
     }
   }
 
@@ -228,14 +234,11 @@ export function TasksPage() {
     setUpdatingTaskId(taskId)
     try {
       await dispatch(editTaskStatus({ id: taskId, status })).unwrap()
-      if (isAdmin) {
-        setActivityRefreshKey((current) => current + 1)
-      }
-      toastUpdated('Task status')
     } catch {
       // Error is stored in Redux state.
     } finally {
       setUpdatingTaskId(null)
+      toastUpdated('Task status')
     }
   }
 
@@ -390,7 +393,6 @@ export function TasksPage() {
         <p className="text-muted">Loading tasks…</p>
       ) : (
         <Table
-          key={`${filters.projectId}-${filters.status}-${filters.priority}-${searchQuery}`}
           columns={columns}
           rows={filteredItems}
           emptyMessage={

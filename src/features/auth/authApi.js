@@ -51,7 +51,25 @@ async function getProfile(authUser) {
     return data
   }
 
-  throw new Error('This account is not active or has been removed. Contact an admin.')
+  const fullName = authUser.user_metadata?.full_name ?? ''
+  const { data: created, error: insertError } = await supabase
+    .from('profiles')
+    .insert({
+      id: authUser.id,
+      full_name: fullName,
+      email: authUser.email ?? '',
+      role: 'user',
+    })
+    .select('full_name, role')
+    .single()
+
+  if (insertError) {
+    throw new Error(
+      toAuthError(insertError, 'Unable to set up your profile. Please try again.'),
+    )
+  }
+
+  return created
 }
 
 export async function getCurrentSession() {
